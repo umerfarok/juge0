@@ -5,6 +5,12 @@ FROM judge0/judge0:1.13.1
 # Avoid interactive prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive
 
+# The upstream judge0/judge0 image runs as a non-root user.
+# We need root privileges for apt-based installs.
+USER root
+
+RUN mkdir -p /var/lib/apt/lists/partial
+
 # ============================================================================
 # UPGRADE COMPILERS TO LATEST VERSIONS
 # ============================================================================
@@ -139,3 +145,6 @@ RUN java -version && \
     dotnet --version && \
     go version && \
     php --version
+
+# Back to the default non-root user for runtime.
+USER judge0
