@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Judge0 Custom Compilers - Test UI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+        
+        .panel {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .panel h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        select, textarea, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus, textarea:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 300px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .output-panel {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            color: #d4d4d4;
+            font-family: 'Consolas', 'Monaco', monospace;
+            min-height: 200px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .output-panel.error {
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .output-panel.success {
+            border-left: 4px solid #2ecc71;
+        }
+        
+        .status {
+            padding: 10px 20px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+        
+        .status.processing {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .language-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .language-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .language-card h3 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        .language-card p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-card .label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Judge0 Custom Compilers</h1>
+            <p>Test your code with upgraded language versions</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="panel">
+                <h2>📝 Code Editor</h2>
+                
+                <div class="form-group">
+                    <label for="language">Select Language:</label>
+                    <select id="language">
+                        <option value="62">Java (OpenJDK 21)</option>
+                        <option value="71" selected>Python (3.12)</option>
+                        <option value="54">C++ (GCC 11)</option>
+                        <option value="50">C (GCC 11)</option>
+                        <option value="63">JavaScript (Node.js 22)</option>
+                        <option value="74">TypeScript (5.6)</option>
+                        <option value="51">C# (.NET 8.0)</option>
+                        <option value="78">Kotlin (2.0.21)</option>
+                        <option value="72">Ruby (3.0)</option>
+                        <option value="60">Go (1.23)</option>
+                        <option value="83">Swift (6.0)</option>
+                        <option value="68">PHP (8.3)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="code">Source Code:</label>
+                    <textarea id="code" placeholder="Write your code here...">print("Hello from Python 3.12!")
+import sys
+print(f"Python version: {sys.version}")</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="stdin">Input (stdin):</label>
+                    <textarea id="stdin" rows="3" placeholder="Enter input for your program..."></textarea>
+                </div>
+                
+                <button class="btn" onclick="runCode()">▶️ Run Code</button>
+                <button class="btn" onclick="clearAll()">🗑️ Clear</button>
+            </div>
+            
+            <div class="panel">
+                <h2>📊 Output</h2>
+                
+                <div id="status"></div>
+                
+                <div class="stats" id="stats" style="display: none;">
+                    <div class="stat-card">
+                        <div class="value" id="execTime">-</div>
+                        <div class="label">Execution Time</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="memory">-</div>
+                        <div class="label">Memory Used</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="statusText">-</div>
+                        <div class="label">Status</div>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 20px; color: #333;">Standard Output:</h3>
+                <div class="output-panel" id="output">Click "Run Code" to execute...</div>
+                
+                <h3 style="margin-top: 20px; color: #333;">Errors / Stderr:</h3>
+                <div class="output-panel" id="stderr">-</div>
+            </div>
+        </div>
+        
+        <div style="padding: 30px; background: #f8f9fa;">
+            <h2 style="color: #667eea; margin-bottom: 20px;">📚 Available Languages</h2>
+            
+            <div class="language-grid">
+                <div class="language-card">
+                    <h3>☕ Java</h3>
+                    <p>OpenJDK 21.0.9</p>
+                </div>
+                <div class="language-card">
+                    <h3>🐍 Python</h3>
+                    <p>Version 3.12.12</p>
+                </div>
+                <div class="language-card">
+                    <h3>⚡ C++</h3>
+                    <p>GCC 11.4.0</p>
+                </div>
+                <div class="language-card">
+                    <h3>🔧 C</h3>
+                    <p>GCC 11.4.0</p>
+                </div>
+                <div class="language-card">
+                    <h3>📜 JavaScript</h3>
+                    <p>Node.js 22.21.0</p>
+                </div>
+                <div class="language-card">
+                    <h3>📘 TypeScript</h3>
+                    <p>Version 5.6.3</p>
+                </div>
+                <div class="language-card">
+                    <h3>💎 C#</h3>
+                    <p>.NET 8.0.416</p>
+                </div>
+                <div class="language-card">
+                    <h3>🎯 Kotlin</h3>
+                    <p>Version 2.0.21</p>
+                </div>
+                <div class="language-card">
+                    <h3>💎 Ruby</h3>
+                    <p>Version 3.0.2</p>
+                </div>
+                <div class="language-card">
+                    <h3>🐹 Go</h3>
+                    <p>Version 1.23.4</p>
+                </div>
+                <div class="language-card">
+                    <h3>🦅 Swift</h3>
+                    <p>Version 6.0.2</p>
+                </div>
+                <div class="language-card">
+                    <h3>🐘 PHP</h3>
+                    <p>Version 8.3.28</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:2358';
+        
+        const codeExamples = {
+            '62': `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello from Java 21!");\n        System.out.println("Version: " + System.getProperty("java.version"));\n    }\n}`,
+            '71': `print("Hello from Python 3.12!")\nimport sys\nprint(f"Python version: {sys.version}")`,
+            '54': `#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello from C++ " << __cplusplus << endl;\n    return 0;\n}`,
+            '50': `#include <stdio.h>\n\nint main() {\n    printf("Hello from C!\\n");\n    return 0;\n}`,
+            '63': `console.log("Hello from Node.js!");\nconsole.log("Version:", process.version);`,
+            '74': `const message: string = "Hello from TypeScript!";\nconsole.log(message);`,
+            '51': `using System;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine("Hello from C#!");\n    }\n}`,
+            '78': `fun main() {\n    println("Hello from Kotlin!")\n    println("Version: " + KotlinVersion.CURRENT)\n}`,
+            '72': `puts "Hello from Ruby!"\nputs "Version: #{RUBY_VERSION}"`,
+            '60': `package main\nimport "fmt"\nimport "runtime"\n\nfunc main() {\n    fmt.Println("Hello from Go!")\n    fmt.Println("Version:", runtime.Version())\n}`,
+            '83': `print("Hello from Swift!")\nprint("Swift version 6.0")`,
+            '68': `<?php\necho "Hello from PHP!\\n";\necho "Version: " . phpversion();`
+        };
+        
+        document.getElementById('language').addEventListener('change', function() {
+            const langId = this.value;
+            if (codeExamples[langId]) {
+                document.getElementById('code').value = codeExamples[langId];
+            }
+        });
+        
+        async function runCode() {
+            const code = document.getElementById('code').value;
+            const languageId = document.getElementById('language').value;
+            const stdin = document.getElementById('stdin').value;
+            
+            const statusDiv = document.getElementById('status');
+            const outputDiv = document.getElementById('output');
+            const stderrDiv = document.getElementById('stderr');
+            const statsDiv = document.getElementById('stats');
+            
+            // Show processing status
+            statusDiv.innerHTML = '<div class="status processing">⏳ Processing... <span class="spinner"></span></div>';
+            outputDiv.textContent = 'Executing...';
+            stderrDiv.textContent = '-';
+            statsDiv.style.display = 'none';
+            
+            try {
+                // Submit code
+                const response = await fetch(`${API_URL}/submissions?base64_encoded=false&wait=true`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        source_code: code,
+                        language_id: parseInt(languageId),
+                        stdin: stdin
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // Display results
+                outputDiv.textContent = result.stdout || '(no output)';
+                stderrDiv.textContent = result.stderr || result.compile_output || '-';
+                
+                if (result.status.id === 3) {
+                    statusDiv.innerHTML = '<div class="status success">✅ Executed Successfully</div>';
+                    outputDiv.classList.add('success');
+                    outputDiv.classList.remove('error');
+                } else {
+                    statusDiv.innerHTML = `<div class="status error">❌ ${result.status.description}</div>`;
+                    outputDiv.classList.add('error');
+                    outputDiv.classList.remove('success');
+                }
+                
+                // Show stats
+                document.getElementById('execTime').textContent = result.time ? `${result.time}s` : '-';
+                document.getElementById('memory').textContent = result.memory ? `${result.memory} KB` : '-';
+                document.getElementById('statusText').textContent = result.status.description;
+                statsDiv.style.display = 'grid';
+                
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="status error">❌ Error: ' + error.message + '</div>';
+                outputDiv.textContent = 'Failed to execute code. Make sure Judge0 API is running at ' + API_URL;
+                outputDiv.classList.add('error');
+            }
+        }
+        
+        function clearAll() {
+            document.getElementById('code').value = '';
+            document.getElementById('stdin').value = '';
+            document.getElementById('output').textContent = 'Output will appear here...';
+            document.getElementById('stderr').textContent = '-';
+            document.getElementById('status').innerHTML = '';
+            document.getElementById('stats').style.display = 'none';
+        }
+        
+        // Check API connection on load
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`${API_URL}/about`);
+                if (response.ok) {
+                    console.log('✅ Connected to Judge0 API');
+                }
+            } catch (error) {
+                console.warn('⚠️ Cannot connect to Judge0 API. Make sure it\'s running.');
+            }
+        });
+    </script>
+</body>
+</html>
