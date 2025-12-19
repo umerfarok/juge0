@@ -125,6 +125,7 @@ RUN curl -sL "https://github.com/JetBrains/kotlin/releases/download/v2.0.21/kotl
 RUN apt-get update && \
     apt-get install -y \
         build-essential \
+        pkg-config \
         libxml2-dev \
         libsqlite3-dev \
         libcurl4-openssl-dev \
@@ -144,7 +145,7 @@ RUN apt-get update && \
     make install && \
     cd / && \
     rm -rf /usr/src/php-8.3.15* && \
-    apt-get purge -y build-essential libxml2-dev libsqlite3-dev libonig-dev libzip-dev && \
+    apt-get purge -y build-essential pkg-config libxml2-dev libsqlite3-dev libonig-dev libzip-dev && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -168,7 +169,6 @@ RUN apt-get update && \
     mkdir -p /usr/local/swift-5.8-version/bin && \
     ln -sf /usr/local/swift-5.8/usr/bin/swift /usr/local/swift-5.8-version/bin/swift && \
     ln -sf /usr/local/swift-5.8/usr/bin/swiftc /usr/local/swift-5.8-version/bin/swiftc && \
-    apt-get purge -y pkg-config && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
