@@ -41,13 +41,29 @@ ENV JAVA_HOME=/usr/local/openjdk-21
 ENV PATH="$JAVA_HOME/bin:$PATH"
 
 # ----------------------------------------------------------------------------
-# PYTHON 3.12
+# PYTHON 3.12 - Build from source (PPA not available on Debian)
 # ----------------------------------------------------------------------------
-RUN add-apt-repository -y ppa:deadsnakes/ppa && \
-    apt-get update && \
-    apt-get install -y python3.12 python3.12-venv python3.12-dev && \
-    mkdir -p /usr/local/python-3.12/bin && \
-    ln -sf /usr/bin/python3.12 /usr/local/python-3.12/bin/python3 && \
+RUN apt-get update && \
+    apt-get install -y \
+        build-essential \
+        zlib1g-dev \
+        libncurses5-dev \
+        libgdbm-dev \
+        libnss3-dev \
+        libssl-dev \
+        libreadline-dev \
+        libffi-dev \
+        libsqlite3-dev \
+        libbz2-dev && \
+    cd /usr/src && \
+    wget https://www.python.org/ftp/python/3.12.8/Python-3.12.8.tgz && \
+    tar -xzf Python-3.12.8.tgz && \
+    cd Python-3.12.8 && \
+    ./configure --enable-optimizations --prefix=/usr/local/python-3.12 && \
+    make -j$(nproc) && \
+    make altinstall && \
+    cd / && \
+    rm -rf /usr/src/Python-3.12.8* && \
     rm -rf /var/lib/apt/lists/*
 
 # ----------------------------------------------------------------------------
@@ -69,9 +85,9 @@ RUN npm install -g typescript@5 && \
     ln -sf /usr/local/bin/tsc /usr/local/typescript-5/bin/tsc
 
 # ----------------------------------------------------------------------------
-# .NET 8.0 SDK (C# / F#)
+# .NET 8.0 SDK (C# / F#) - Direct binary install for Debian Buster
 # ----------------------------------------------------------------------------
-RUN wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
+RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
     dpkg -i packages-microsoft-prod.deb && \
     rm packages-microsoft-prod.deb && \
     apt-get update && \
@@ -102,13 +118,30 @@ RUN curl -sL "https://github.com/JetBrains/kotlin/releases/download/v2.0.21/kotl
     ln -sf /usr/local/kotlin-2.0/bin/kotlinc /usr/local/kotlin-2.0-version/bin/kotlinc
 
 # ----------------------------------------------------------------------------
-# PHP 8.3
+# PHP 8.3 - Build from source (PPA not available on Debian)
 # ----------------------------------------------------------------------------
-RUN add-apt-repository -y ppa:ondrej/php && \
-    apt-get update && \
-    apt-get install -y php8.3 php8.3-cli && \
-    mkdir -p /usr/local/php-8.3/bin && \
-    ln -sf /usr/bin/php8.3 /usr/local/php-8.3/bin/php && \
+RUN apt-get update && \
+    apt-get install -y \
+        build-essential \
+        libxml2-dev \
+        libsqlite3-dev \
+        libcurl4-openssl-dev \
+        libonig-dev \
+        libzip-dev && \
+    cd /usr/src && \
+    wget https://www.php.net/distributions/php-8.3.15.tar.gz && \
+    tar -xzf php-8.3.15.tar.gz && \
+    cd php-8.3.15 && \
+    ./configure \
+        --prefix=/usr/local/php-8.3 \
+        --enable-mbstring \
+        --with-curl \
+        --with-openssl \
+        --with-zlib && \
+    make -j$(nproc) && \
+    make install && \
+    cd / && \
+    rm -rf /usr/src/php-8.3.15* && \
     rm -rf /var/lib/apt/lists/*
 
 # ----------------------------------------------------------------------------
@@ -143,11 +176,11 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Verify installations
 RUN java -version && \
-    python3.12 --version && \
+    /usr/local/python-3.12/bin/python3.12 --version && \
     node --version && \
     dotnet --version && \
     go version && \
-    php --version
+    /usr/local/php-8.3/bin/php --version
 
 # Back to the default non-root user for runtime.
 USER judge0
