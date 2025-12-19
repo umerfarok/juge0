@@ -145,8 +145,9 @@ RUN apt-get update && \
     make install && \
     cd / && \
     rm -rf /usr/src/php-8.3.15* && \
+    apt-mark auto libonig5 libzip4 && \
     apt-get purge -y build-essential pkg-config libxml2-dev libsqlite3-dev libonig-dev libzip-dev && \
-    apt-get autoremove -y && \
+    apt-mark manual libonig5 libzip4 && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # ----------------------------------------------------------------------------
